@@ -77,7 +77,7 @@ class Fermi_sensitivity:
             self.energy = energy*(u.MeV)
             self.bounds = (self.energy.min(),self.energy.max())
             self.E2flux = entries[string]*(u.erg*u.cm**(-2)*u.s**(-1))
-            self.interpE2flux = interp1d(self.energy,self.E2flux,kind='cubic')
+            self.interpE2flux = interp1d(self.energy,self.E2flux,kind='cubic',assume_sorted=True)
 
         else : 
             
@@ -94,6 +94,7 @@ class Fermi_sensitivity:
         flux = self.interpE2flux(E)*(u.erg*u.cm**(-2)*u.s**(-1))
         
         return flux.to(u.MeV*u.cm**(-2)*u.s**(-1))
+
 #%%
 
 if __name__ == '__main__':

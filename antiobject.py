@@ -16,18 +16,28 @@ from pion_decay import pion_decay
 
 class Antiobject:
     
-    def __init__(self,settings):
+    sensitivity = Fermi_sensitivity('l0b30')
+    bounds = sensitivity.bounds
+    E_span = np.linspace(bounds[0],938*u.MeV,10000)
+    F_span = pion_decay.spectrum(E_span)
+    
+    def __init__(self,**kwargs):
         
-        self.sensitivity = Fermi_sensitivity('l0b30')
-        self.bounds = self.sensitivity.bounds
-        self.E_span = np.linspace(self.bounds[0],938*u.MeV,10000)
-        self.F_span = pion_decay.spectrum(self.E_span)
-        self.proton_flux = settings['proton_flux'] 
-        self.effective_surface = settings['effective_surface'] 
-        self.earth_distance = settings['earth_distance'] 
-        self.flux_on_earth = (self.E_span**2*self.F_span*self.proton_flux*self.effective_surface/(4*np.pi*self.earth_distance**2)).to(u.MeV*u.cm**(-2)*u.s**(-1))
+        self.proton_flux = kwargs.get('proton_flux',None)
+        self.effective_surface = kwargs.get('effective_surface',None)
+        self.gamma_luminosity = kwargs.get('gamma_luminosity',None)
+        self.earth_distance = kwargs.get('earth_distance',None)
+        
+        if self.gamma_luminosity is None :
+            self.flux_on_earth = (self.E_span**2*self.F_span*self.proton_flux*self.effective_surface/(4*np.pi*self.earth_distance**2)).to(u.MeV*u.cm**(-2)*u.s**(-1))
+        
+        else :
+            self.flux_on_earth = (self.E_span**2*self.F_span/(4*np.pi*self.earth_distance**2)*self.gamma_luminosity/3.82).to(u.MeV*u.cm**(-2)*u.s**(-1))
+        
+        
         self.magnitude = np.log10(self.flux_on_earth/self.sensitivity.flux(self.E_span))
         self.max = np.max(self.magnitude)
+        self.is_observable = self.max > 1
         
     def plot(self):
         
@@ -47,14 +57,16 @@ class Antiobject:
 
 #%%
 
-jupiter_settings = {'proton_flux' : 2e8*(1/5.2)**2*(u.cm**(-2)*u.s**(-1)),
-                    'effective_surface' : 2*np.pi*(7e7*u.m)**2,
-                    'earth_distance' : 5.91e11*u.cm}
-   
-asteroid_settings = {'proton_flux' : 2e8*(1/4)**2*(u.cm**(-2)*u.s**(-1)),
-                    'effective_surface' : 2*np.pi*(1*u.km)**2,
-                    'earth_distance' : 3*u.AU}
-     
-antijupiter = Antiobject(asteroid_settings)
-antijupiter.plot()
+antijupiter = Antiobject(proton_flux = 2e8*(1/5.2)**2*(u.cm**(-2)*u.s**(-1)),
+                         effective_surface = 2*np.pi*(7e7*u.m)**2,
+                         earth_distance = 5.91e11*u.cm)
 
+antiasteroid = Antiobject(proton_flux = 2e8*(1/4)**2*(u.cm**(-2)*u.s**(-1)),
+                          effective_surface = 2*np.pi*(1*u.km)**2,
+                          earth_distance = 3*u.AU)
+
+antistar = Antiobject(gamma_luminosity = (1/3)*1e36*(1/10)**3/u.s,
+                      earth_distance = 150*u.pc)
+
+antiasteroid.plot()
+antistar.plot()
