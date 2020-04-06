@@ -13,6 +13,7 @@ import astropy.units as u
 class pion_decay:
     
     E_max = 70.77483833786383*u.MeV
+    N = 3.82
     
     def spectrum(E):
     

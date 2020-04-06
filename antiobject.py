@@ -32,7 +32,7 @@ class Antiobject:
             self.flux_on_earth = (self.E_span**2*self.F_span*self.proton_flux*self.effective_surface/(4*np.pi*self.earth_distance**2)).to(u.MeV*u.cm**(-2)*u.s**(-1))
         
         else :
-            self.flux_on_earth = (self.E_span**2*self.F_span/(4*np.pi*self.earth_distance**2)*self.gamma_luminosity/3.82).to(u.MeV*u.cm**(-2)*u.s**(-1))
+            self.flux_on_earth = (self.E_span**2*self.F_span/(4*np.pi*self.earth_distance**2)*self.gamma_luminosity/pion_decay.N).to(u.MeV*u.cm**(-2)*u.s**(-1))
         
         
         self.magnitude = np.log10(self.flux_on_earth/self.sensitivity.flux(self.E_span))
