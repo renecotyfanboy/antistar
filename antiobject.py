@@ -65,8 +65,5 @@ antiasteroid = Antiobject(proton_flux = 2e8*(1/4)**2*(u.cm**(-2)*u.s**(-1)),
                           effective_surface = 2*np.pi*(1*u.km)**2,
                           earth_distance = 3*u.AU)
 
-antistar = Antiobject(gamma_luminosity = (1/3)*1e36*(1/10)**3/u.s,
+antistar = Antiobject(gamma_luminosity = (1/3)*1e36*(10)**2*(1/10)**3/u.s,
                       earth_distance = 150*u.pc)
-
-antiasteroid.plot()
-antistar.plot()
