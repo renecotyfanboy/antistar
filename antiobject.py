@@ -52,19 +52,30 @@ class Antiobject:
                 if self.effective_surface is None:
                     
                     self.effective_surface = 2*np.pi*self.radius**2
-                    self.computed_properties["effective_surface"] = self.effective_surface
                     
                 self.gamma_luminosity = (pion_decay.N*self.proton_flux*self.effective_surface).to(1/u.s)
                 self.computed_properties["gamma_luminosity"] = self.gamma_luminosity
           
         # Earth flux computation
-        self.flux_on_earth = (self.E_span**2*self.F_span/(4*np.pi*self.earth_distance**2)*self.gamma_luminosity/pion_decay.N).to(u.erg*u.cm**(-2)*u.s**(-1))
+        self.flux_on_earth = (self.E_span**2*0.5*self.F_span/(4*np.pi*self.earth_distance**2)*self.gamma_luminosity/pion_decay.N).to(u.erg*u.cm**(-2)*u.s**(-1))
         self.magnitude = np.log10(self.flux_on_earth/self.sensitivity.flux(self.E_span))
         self.max = np.max(self.magnitude)
         self.is_observable = self.max > 1
         self.computed_properties["max_magnitude"] = self.max
         
-    def plot(self,):
+    @classmethod
+    def antistar_factory(cls,mass=10*u.M_sun,velocity=100*(u.km/u.s),earth_distance=30*u.pc,name = 'Antistar'):
+        
+        return cls(mass = mass,velocity = velocity,earth_distance = earth_distance,name = name)
+     
+    @classmethod
+    def antiplanet_factory(cls,proton_flux = 2e8*(1/5.2)**2*(u.cm**(-2)*u.s**(-1)),radius = 7e7*u.m,earth_distance = 591e6*u.km,name = 'Antijupiter'):
+    
+        return cls(proton_flux = proton_flux,radius = radius,earth_distance = earth_distance,name = name)    
+    
+    
+    
+    def plot(self):
         
         from matplotlib import rc
 
@@ -72,7 +83,7 @@ class Antiobject:
         rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
         rc('text', usetex=True)
         
-        plt.figure(figsize=(10,5), tight_layout=True)
+        plt.figure(figsize=(9,4.5), tight_layout=True)
         plt.subplot(121)
         plt.loglog(self.E_span,self.flux_on_earth,color='black',label='Flux on Earth')
         plt.loglog(self.E_span,(self.sensitivity.flux(self.E_span)).to(u.erg*u.cm**(-2)*u.s**(-1)),color='black',linestyle=':',label='Fermi-LAT sensitivity')

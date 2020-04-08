@@ -15,11 +15,6 @@ class pion_decay:
     
     def spectrum(E):
     
-        if isinstance(E,u.Quantity):
-            E_loc = E/u.MeV
-        else :
-            E_loc = E
-            
         E0 = 938.28
         alpha_1 = 4.155
         beta_1 = -33.494
@@ -31,7 +26,14 @@ class pion_decay:
         #Section efficace totale
         N = 3.82 #gamma/annihilation p+/p-
         
-        return N*(np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_1*np.exp(beta_1)+np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_2*np.exp(beta_2)+beta_3*np.exp(alpha_3*E_loc))/u.MeV
+        if isinstance(E,u.Quantity):
+            E_loc = E/u.MeV
+            return N*((E0-E_loc)**alpha_1*np.exp(beta_1)+(E0-E_loc)**alpha_2*np.exp(beta_2)+beta_3*np.exp(alpha_3*E_loc))/u.MeV
+        else :
+            E_loc = E
+            return N*(np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_1*np.exp(beta_1)+np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_2*np.exp(beta_2)+beta_3*np.exp(alpha_3*E_loc))
+        
+        
         
 #%% Demo
 
