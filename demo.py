@@ -20,10 +20,13 @@ antiasteroid = Antiobject.antiplanet_factory(proton_flux = 2e8*(1/3)**2*(u.cm**(
 
 antistar = Antiobject.antistar_factory()
 
+cluster = Antiobject.cluster_factory()
 #%% Antiobject plotting
 
 antistar.plot()
 antijupiter.plot()
-antiasteroid.plot()
+cluster.plot()
+#antiasteroid.plot()
+
 
 #plt.savefig("foo.png", dpi=1200)
