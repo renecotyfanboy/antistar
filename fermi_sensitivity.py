@@ -13,6 +13,8 @@ from scipy.interpolate import interp1d
 
 class Fermi_sensitivity:
     
+    origin = 'P8R3_SOURCE_V2'
+    
     def __init__(self,string):
         
         if string in ['l0b0','l0b30','l0b90','l120b45']:
@@ -82,7 +84,8 @@ class Fermi_sensitivity:
         else : 
             
             print("Utiliser l0b0, l0b30, l0b90,l120b45")
-            
+    
+    #A modifier : SED = E²*flux/MeV
     def SED(self,E):
         
         flux = self.interpE2flux(E)*(u.erg*u.cm**(-2)*u.s**(-1))/E**2
@@ -94,8 +97,9 @@ class Fermi_sensitivity:
         flux = self.interpE2flux(E)*(u.erg*u.cm**(-2)*u.s**(-1))
         
         return flux.to(u.MeV*u.cm**(-2)*u.s**(-1))
+    
 
-#%%
+#%% Demo
 
 if __name__ == '__main__':
 
