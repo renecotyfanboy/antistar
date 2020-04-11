@@ -19,7 +19,7 @@ class Source_analyser:
     def __init__(self,source):
         
         self.source = source
-        self.spectrum_type = source.field('SpectrumType')[0]
+        self.spectrum_type = source.field('SpectrumType')
         self.specs = self.get_specs()
         self.spectrum = self.get_func()
         
@@ -53,16 +53,14 @@ class Source_analyser:
             
             return f
     
-    def plot_nufnu(self):
+    def plot_nufnu(self,ax):
         
-        plt.loglog()
-        yerr = (self.source.field('Unc_Flux_Band')[:,:,1]/self.source.field('Flux_Band')*self.source.field('nuFnu_Band')).reshape((7,))
-        plt.errorbar(self.bands_center,self.source.field('nuFnu_Band')[0,:],xerr = self.band_error,yerr=yerr,fmt='none',color='black')
+        yerr = self.source.field('Unc_Flux_Band')[:,1]/self.source.field('Flux_Band')*self.source.field('nuFnu_Band')
+        ax.errorbar(self.bands_center,self.source.field('nuFnu_Band'),xerr = self.band_error,yerr=yerr,fmt='none',color='black')
         
-    def plot_model(self):
+    def plot_model(self,ax):
         
-        plt.loglog()
-        E_span = np.linspace(30,50000,10000)*u.MeV
+        E_span = np.linspace(30,300000,100000)*u.MeV
         confprob = 0.60
         dof = 2
         tval = t.ppf(1.0 - (1.0 - confprob)/2, dof)
@@ -74,15 +72,15 @@ class Source_analyser:
             sig += abs(self.source.field('Unc_PL_Index')*self.spectrum(E_span)*np.log(E_span/(self.source.field('Pivot_Energy')*u.MeV)))
             sig = tval*sig.to(u.erg/u.cm**2/u.s)
             
-            plt.plot(E_span,(self.spectrum(E_span)).to(u.erg/u.cm**2/u.s),color='black',linestyle='--')
-            plt.fill_between(E_span,(self.spectrum(E_span)+sig).to(u.erg/u.cm**2/u.s),(self.spectrum(E_span)-sig).to(u.erg/u.cm**2/u.s),color='lightgrey')
+            ax.plot(E_span,(self.spectrum(E_span)).to(u.erg/u.cm**2/u.s),color='black',linestyle='--')
+            ax.fill_between(E_span,(self.spectrum(E_span)+sig).to(u.erg/u.cm**2/u.s),(self.spectrum(E_span)-sig).to(u.erg/u.cm**2/u.s),color='lightgrey')
             
-    def plot_all(self):
+    def plot_all(self,ax):
         
-        self.plot_model()
-        self.plot_nufnu()
+        self.plot_model(ax)
+        self.plot_nufnu(ax)
         
-        plt.xlabel(r'$E_\gamma$ [MeV]')
-        plt.ylabel(r'$\nu F_\nu$ [erg.cm-2.s-1]')
-        plt.xlim(45,300000)
-        plt.ylim(0.09e-11,10e-11)
+        ax.set_xlabel(r'$E_\gamma$ [MeV]')
+        ax.set_ylabel(r'$\nu F_\nu$ [erg.cm-2.s-1]')
+        ax.set_xlim(left=45,right=300000)
+        #plt.ylim(0.09e-11,10e-11)

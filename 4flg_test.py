@@ -9,7 +9,9 @@ import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 
+from matplotlib.widgets import RadioButtons
 from astropy.io import fits
+from source_analyser import Source_analyser
 
 """
 50-100 MeV, 
@@ -20,9 +22,6 @@ from astropy.io import fits
 10-30 GeV,
 30-300 GeV
 """
-
-bands_center = np.sqrt([50*100,100*300,300*1000,1e3*3e3,3e3*10e3,10e3*30e3,30e3*300e3])
-band_error = np.vstack((np.abs(bands_center-np.array([50,100,300,1000,3000,10000,30000])),np.abs(bands_center-np.array([100,300,1000,3000,10000,30000,300000]))))
 
 def filter(data):
     
@@ -65,17 +64,19 @@ with fits.open('gll_psc_v21.fit') as fermi_catalog:
     
     final_sources, excluded_sources  = filter(data)
     
-    # fig,axs = plt.subplots(nrows=2,ncols=1,sharex=True)
-    # axs[0].set_title('nuFnu_Band')
-    # axs[1].set_title('Sqrt_TS_Band')
+    fig, axs = plt.subplots(nrows = 1,ncols = 2,figsize=(10,5))
     
-    #for i in range(np.shape(final_sources.field('nuFnu_Band'))[0]):
-
-    i = 0
+    analyser = Source_analyser(final_sources[0])
+    analyser.plot_all(axs[0])
+    axs[0].loglog()
+    axs[1].set_facecolor('lightgoldenrodyellow')
+    radio = RadioButtons(axs[1], tuple(final_sources.field('Source_Name')))
+    
+    def source_func(label):
+        axs[0].clear()
+        axs[0].loglog()
+        analyser = Source_analyser(final_sources[final_sources.field('Source_Name')==label][0])
+        analyser.plot_all(axs[0])
+        plt.draw()
         
-    # axs[0].loglog(bands_center,final_sources.field('nuFnu_Band')[i,:],label=final_sources.field('Source_Name')[i])  
-    # axs[1].semilogx(bands_center,final_sources.field('Sqrt_TS_Band')[i,:])
-    # axs[0].legend()
-    
-    plt.errorbar(bands_center,final_sources.field('nuFnu_Band')[i,:],xerr = band_error,fmt='none')
-    plt.loglog()
+    radio.on_clicked(source_func)
