@@ -69,6 +69,7 @@ with fits.open('gll_psc_v21.fit') as fermi_catalog:
         axs[0].clear()
         source = Source_4FGL(final_sources[final_sources.field('Source_Name')==label][0])
         source.plot_all(axs[0])
+        plt.tight_layout()
         plt.draw()
         
     radio.on_clicked(source_func)

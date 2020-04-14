@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from sympy import symbols,log,sqrt,lambdify,diff
 from astropy.io import fits
 from scipy.stats import t as Student_t
+from scipy.optimize import minimize_scalar
 
 class Source_4FGL:
         
@@ -98,6 +99,10 @@ class Source_4FGL:
         else :
             
             print("Implémenter PLEC")
+            
+        res = minimize_scalar(lambda E: -self._fitted_spectrum(E)*E**2*(u.MeV*u.cm**(-2)*u.s**(-1))/(u.erg*u.cm**(-2)*u.s**(-1)),bounds=(50, 300e3), method='bounded')
+        self.model['E_max'] = res.x*u.MeV
+        self.model['nuFnu_max'] = -res.fun*(u.erg*u.cm**(-2)*u.s**(-1)) 
     
     def fitted_spectrum(self,E):
     
@@ -162,7 +167,7 @@ class Source_4FGL:
                         (self.fitted_nuFnu(E_span)+self.fitted_error_nuFnu(E_span))/(u.erg*u.cm**(-2)*u.s**(-1)),
                         (self.fitted_nuFnu(E_span)-self.fitted_error_nuFnu(E_span))/(u.erg*u.cm**(-2)*u.s**(-1)),
                         color='lightgrey')
-        
+                
     def plot_band(self,ax):
         
         ax.errorbar(self.bands_center[self.spectrum['is_not_ul']],
@@ -191,7 +196,13 @@ class Source_4FGL:
         
         self.plot_fitted(ax)
         self.plot_band(ax)
-        
+        ax.set_xlabel(r'$E_\gamma$ [{}]'.format((1*u.MeV).unit.to_string('latex_inline')))
+        ax.set_ylabel(r'$\nu F_\nu$ [{}]'.format((1*u.erg*u.cm**(-2)*u.s**(-1)).unit.to_string('latex_inline')))
+        ax.set_xlim(left=50,right=200e3)
+        ax.set_ylim(top=3*self.model['nuFnu_max']/(u.erg*u.cm**(-2)*u.s**(-1)),
+                    bottom=0.1*self.fitted_nuFnu(300e3*u.MeV)/(u.erg*u.cm**(-2)*u.s**(-1)))
+        plt.tight_layout()
+
 #%% Test code
 
 if __name__ == '__main__':
@@ -209,9 +220,5 @@ if __name__ == '__main__':
         #'4FGL J2028.6+4110e'
         
         fig, ax = plt.subplots()
-        plt.xlim(50,200000)
-        plt.ylim(0.07e-12,6e-12)
-        plt.loglog()
-        source.plot_fitted(ax)
-        source.plot_band(ax)
+        source.plot_all(ax)
     
