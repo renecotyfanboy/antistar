@@ -6,22 +6,16 @@ Created on Thu Apr  9 18:35:11 2020
 """
 
 import numpy as np
-import astropy.units as u
 import matplotlib.pyplot as plt
 
 from matplotlib.widgets import RadioButtons
 from astropy.io import fits
-from source_analyser import Source_analyser
+from Source_4FGL import Source_4FGL
+from matplotlib import rc
 
-"""
-50-100 MeV, 
-100-300 MeV, 
-300-1 GeV, 
-1-3 GeV, 
-3-10 GeV, 
-10-30 GeV,
-30-300 GeV
-"""
+# activate latex text rendering
+rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
+rc('text', usetex=True)
 
 def filter(data):
     
@@ -66,17 +60,15 @@ with fits.open('gll_psc_v21.fit') as fermi_catalog:
     
     fig, axs = plt.subplots(nrows = 1,ncols = 2,figsize=(10,5))
     
-    analyser = Source_analyser(final_sources[0])
-    analyser.plot_all(axs[0])
-    axs[0].loglog()
+    source = Source_4FGL(final_sources[0])
+    source.plot_all(axs[0])
     axs[1].set_facecolor('lightgoldenrodyellow')
-    radio = RadioButtons(axs[1], tuple(final_sources.field('Source_Name')))
+    radio = RadioButtons(axs[1], tuple(final_sources.field('Source_Name')),activecolor='black')
     
     def source_func(label):
         axs[0].clear()
-        axs[0].loglog()
-        analyser = Source_analyser(final_sources[final_sources.field('Source_Name')==label][0])
-        analyser.plot_all(axs[0])
+        source = Source_4FGL(final_sources[final_sources.field('Source_Name')==label][0])
+        source.plot_all(axs[0])
         plt.draw()
         
     radio.on_clicked(source_func)
