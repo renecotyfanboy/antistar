@@ -40,8 +40,12 @@ class pion_decay:
 if __name__ == '__main__':
     
     import matplotlib.pyplot as plt
+    from matplotlib import rc
     
-    fig, ax = plt.subplots()
+    rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
+    rc('text', usetex=True)
+    
+    fig, ax = plt.subplots(figsize=(3,3))
     
     E_span = np.linspace(1*u.MeV,938*u.MeV,10000)
     F_span = pion_decay.spectrum(E_span)
@@ -56,3 +60,6 @@ if __name__ == '__main__':
     ax.grid(True, which="both")
     ax.set_xlim(left=3,right=2000)  
     ax.set_ylim(bottom=5e-6,top=5e-2)
+    plt.title(r'$p-\bar{p}$ annihilation')
+    plt.tight_layout()
+    plt.savefig('fig.png',dpi=600, transparent = True)

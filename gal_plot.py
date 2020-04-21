@@ -7,10 +7,8 @@ Created on Thu Apr  9 18:35:11 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-from matplotlib.widgets import RadioButtons
+import astropy.units as u
 from astropy.io import fits
-from Source_4FGL import Source_4FGL
 from matplotlib import rc
 
 # activate latex text rendering
@@ -57,20 +55,41 @@ with fits.open('gll_psc_v21.fit') as fermi_catalog:
 
     data = fermi_catalog[1].data
     
-    final_sources, excluded_sources  = filter(data)
+final_sources, excluded_sources  = filter(data)
+
+glon_span = []
+glat_span = []
+
+for _ in range(len(final_sources)):
     
-    fig, axs = plt.subplots(nrows = 1,ncols = 2,figsize=(10,5))
+    source = final_sources[_]
     
-    source = Source_4FGL(final_sources[0])
-    source.plot_all(axs[0])
-    axs[1].set_facecolor('lightgoldenrodyellow')
-    radio = RadioButtons(axs[1], tuple(final_sources.field('Source_Name')),activecolor='black')
+    if source.field('Source_Name') == "4FGL J0546.5-1100":
     
-    def source_func(label):
-        axs[0].clear()
-        source = Source_4FGL(final_sources[final_sources.field('Source_Name')==label][0])
-        source.plot_all(axs[0])
-        plt.tight_layout()
-        plt.draw()
-        
-    radio.on_clicked(source_func)
+        glon_span.append(source.field('GLON'))
+        glat_span.append(source.field('GLAT'))
+
+glon_span = np.array(glon_span)
+glon_span[glon_span>180] -= 360
+glon_span *= -np.pi/180
+glat_span = np.array(glat_span)*np.pi/180
+
+axes_coords = [0, 0, 1, 1]
+
+fig = plt.figure(figsize=(4,2.5))
+
+ax_image = fig.add_axes(axes_coords, label="ax image")
+img = plt.imread('fermi_sky_map.png',format='float')
+ax_image.imshow(img)
+ax_image.axis('off')
+
+ax_aitoff = fig.add_axes(axes_coords, projection='aitoff')
+ax_aitoff.grid(True)
+ax_aitoff.patch.set_alpha(0.)
+ax_aitoff.set_xticklabels([])
+ax_aitoff.set_yticklabels([])
+ax_aitoff.scatter(glon_span,glat_span,color='white',marker='*',s=80)
+
+plt.title(r'7 sources with significance $< 3 \sigma$ over 1 GeV')
+#plt.close()
+#plt.savefig('custom_skymap.png', dpi=600,transparent=True)

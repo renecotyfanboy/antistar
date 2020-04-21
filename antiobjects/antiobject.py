@@ -82,9 +82,9 @@ class Antiobject:
         plt.figure(figsize=(9,4.5), tight_layout=True)
         plt.subplot(121)
         plt.loglog(self.E_span,self.flux_on_earth,color='black',label='Flux on Earth')
-        plt.loglog(self.E_span,(self.sensitivity.flux(self.E_span)).to(u.erg*u.cm**(-2)*u.s**(-1)),color='black',linestyle=':',label='Fermi-LAT sensitivity')
+        plt.loglog(self.E_span,(self.sensitivity.flux(self.E_span)).to(u.erg*u.cm**(-2)*u.s**(-1)),color='black',linestyle=':',label='Fermi-LAT sensitivity \n 10 years point source')
         plt.xlabel(r'$E_\gamma$ [{}]'.format(self.E_span.unit.to_string('latex_inline')))
-        plt.ylabel(r'$\Phi_\gamma$ [{}]'.format(self.flux_on_earth.unit.to_string('latex_inline')))
+        plt.ylabel(r'$\nu F_\nu$ [{}]'.format(self.flux_on_earth.unit.to_string('latex_inline')))
         plt.xlim(left=self.bounds[0]/u.MeV,right=937)
         plt.grid(True,which="both",ls="-")
         plt.legend()
@@ -92,7 +92,26 @@ class Antiobject:
         plt.subplot(122,adjustable='datalim')
         plt.axis('off')
         plt.table(self.gen_cells(), cellLoc='center',bbox=[0,0,1,1],fontsize=22)
+    
+    def plot_spectrum(self):
         
+        from matplotlib import rc
+        
+        # activate latex text rendering
+        rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
+        rc('text', usetex=True)
+        
+        plt.figure(figsize=(3,3), tight_layout=True)
+        plt.loglog(self.E_span,self.flux_on_earth,color='black',label='Flux on Earth')
+        plt.loglog(self.E_span,(self.sensitivity.flux(self.E_span)).to(u.erg*u.cm**(-2)*u.s**(-1)),color='black',linestyle=':',label='Fermi-LAT sensitivity \n 10 years point source')
+        plt.xlabel(r'$E_\gamma$ [{}]'.format(self.E_span.unit.to_string('latex_inline')))
+        plt.ylabel(r'$\nu F_\nu$ [{}]'.format(self.flux_on_earth.unit.to_string('latex_inline')))
+        plt.xlim(left=self.bounds[0]/u.MeV,right=937)
+        plt.grid(True,which="both",ls="-")
+        plt.legend()
+        plt.title(r'Antistar spectrum $(10 M_\odot, 30 pc)$')
+    
+    
     def gen_cells(self):
         
         key_to_latex = {'proton_flux':r'$\Phi_p$',

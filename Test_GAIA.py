@@ -7,11 +7,13 @@ Created on Thu Apr  9 18:35:11 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
+import astropy.units as u
 
-from matplotlib.widgets import RadioButtons
 from astropy.io import fits
 from Source_4FGL import Source_4FGL
 from matplotlib import rc
+from astropy.coordinates import SkyCoord
+from astroquery.gaia import Gaia
 
 # activate latex text rendering
 rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
@@ -56,21 +58,28 @@ def filter(data):
 with fits.open('gll_psc_v21.fit') as fermi_catalog:
 
     data = fermi_catalog[1].data
-    
     final_sources, excluded_sources  = filter(data)
-    
-    fig, axs = plt.subplots(nrows = 1,ncols = 2,figsize=(10,5))
-    
-    source = Source_4FGL(final_sources[0])
-    source.plot_all(axs[0])
-    axs[1].set_facecolor('lightgoldenrodyellow')
-    radio = RadioButtons(axs[1], tuple(final_sources.field('Source_Name')),activecolor='black')
-    
-    def source_func(label):
-        axs[0].clear()
-        source = Source_4FGL(final_sources[final_sources.field('Source_Name')==label][0])
-        source.plot_all(axs[0])
-        plt.tight_layout()
-        plt.draw()
         
-    radio.on_clicked(source_func)
+    ra_span = []
+    de_span = []
+    ellipse = []
+    dist = []
+    
+    for _ in range(len(final_sources)):
+        
+        source = final_sources[_]
+        ra_span.append(source.field('RAJ2000'))
+        de_span.append(source.field('DEJ2000'))
+        ellipse.append(source.field('Conf_68_SemiMajor'))
+        
+    ra_span = np.array(ra_span)*u.deg
+    de_span = np.array(de_span)*u.deg
+    ellipse = np.array(ellipse)*u.deg
+    
+    for _ in range(len(final_sources)):
+    
+        coord = SkyCoord(ra=ra_span[_], dec=de_span[_], frame='icrs')
+        radius = ellipse[_]
+        j = Gaia.cone_search_async(coord, radius)
+        r = j.get_results()
+        dist.append(r[0]['dist']*u.kpc.to(u.pc))

@@ -194,13 +194,22 @@ class Source_4FGL:
         
     def plot_all(self,ax):
         
-        self.plot_fitted(ax)
-        self.plot_band(ax)
+        
         ax.set_xlabel(r'$E_\gamma$ [{}]'.format((1*u.MeV).unit.to_string('latex_inline')))
         ax.set_ylabel(r'$\nu F_\nu$ [{}]'.format((1*u.erg*u.cm**(-2)*u.s**(-1)).unit.to_string('latex_inline')))
-        ax.set_xlim(left=50,right=200e3)
+        self.plot_fitted(ax)
+        self.plot_band(ax)
+        
+        ax.set_xticks([10**n for n in range(10)])
+        ax.set_xlim(left=40,right=200e3)
         ax.set_ylim(top=3*self.model['nuFnu_max']/(u.erg*u.cm**(-2)*u.s**(-1)),
                     bottom=0.1*self.fitted_nuFnu(300e3*u.MeV)/(u.erg*u.cm**(-2)*u.s**(-1)))
+        # from matplotlib.ticker import ScalarFormatter
+        # for axis in [ax.xaxis, ax.yaxis]:
+        #     formatter = ScalarFormatter()
+        #     formatter.set_scientific(True)
+        #     axis.set_major_formatter(formatter)
+        
         plt.tight_layout()
 
 #%% Test code

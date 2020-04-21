@@ -7,11 +7,13 @@ Created on Thu Apr  9 18:35:11 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import astropy.units as u
+from tqdm import tqdm
 from matplotlib.widgets import RadioButtons
 from astropy.io import fits
 from Source_4FGL import Source_4FGL
 from matplotlib import rc
+from mw_plot import MWSkyMap
 
 # activate latex text rendering
 rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
@@ -56,21 +58,16 @@ def filter(data):
 with fits.open('gll_psc_v21.fit') as fermi_catalog:
 
     data = fermi_catalog[1].data
-    
     final_sources, excluded_sources  = filter(data)
     
-    fig, axs = plt.subplots(nrows = 1,ncols = 2,figsize=(10,5))
-    
-    source = Source_4FGL(final_sources[0])
-    source.plot_all(axs[0])
-    axs[1].set_facecolor('lightgoldenrodyellow')
-    radio = RadioButtons(axs[1], tuple(final_sources.field('Source_Name')),activecolor='black')
-    
-    def source_func(label):
-        axs[0].clear()
-        source = Source_4FGL(final_sources[final_sources.field('Source_Name')==label][0])
-        source.plot_all(axs[0])
-        plt.tight_layout()
-        plt.draw()
+    for _ in tqdm(range(len(final_sources))):
         
-    radio.on_clicked(source_func)
+        source = Source_4FGL(final_sources[_])
+        fig,ax = plt.subplots(figsize=(3,3))
+        plt.loglog()
+        plt.grid(True,which="both",ls="-")
+        source.plot_all(ax)
+        plt.title(source.name)
+        plt.tight_layout()
+        plt.savefig('final_sources_4FGL/'+source.name+".png", dpi=600,transparent=True)
+        plt.close()

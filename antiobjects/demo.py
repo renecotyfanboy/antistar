@@ -23,10 +23,10 @@ antistar = Antiobject.antistar_factory()
 cluster = Antiobject.cluster_factory()
 #%% Antiobject plotting
 
-antistar.plot()
-antijupiter.plot()
-cluster.plot()
+antistar.plot_spectrum()
+#antijupiter.plot()
+#cluster.plot()
 #antiasteroid.plot()
 
 
-#plt.savefig("foo.png", dpi=1200)
+plt.savefig("astar.png", dpi=600,transparent=True)
