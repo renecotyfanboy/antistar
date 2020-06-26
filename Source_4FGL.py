@@ -200,7 +200,7 @@ class Source_4FGL:
         self.plot_fitted(ax)
         self.plot_band(ax)
         
-        ax.set_xticks([10**n for n in range(10)])
+        ax.set_xticks([10**2 for n in range(10)])
         ax.set_xlim(left=40,right=200e3)
         ax.set_ylim(top=3*self.model['nuFnu_max']/(u.erg*u.cm**(-2)*u.s**(-1)),
                     bottom=0.1*self.fitted_nuFnu(300e3*u.MeV)/(u.erg*u.cm**(-2)*u.s**(-1)))

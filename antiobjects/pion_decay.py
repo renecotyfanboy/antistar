@@ -31,11 +31,32 @@ class pion_decay:
             return N*((E0-E_loc)**alpha_1*np.exp(beta_1)+(E0-E_loc)**alpha_2*np.exp(beta_2)+beta_3*np.exp(alpha_3*E_loc))/u.MeV
         else :
             E_loc = E
-            return N*(np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_1*np.exp(beta_1)+np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_2*np.exp(beta_2)+beta_3*np.exp(alpha_3*E_loc))
+            if E>E0:
+                return 0
+            else:
+                return N*(np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_1*np.exp(beta_1)+np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_2*np.exp(beta_2)+beta_3*np.exp(alpha_3*E_loc))
         
         
         
 #%% Demo
+@np.vectorize
+def spectrum(E):
+    
+    E0 = 938.28
+    alpha_1 = 4.155
+    beta_1 = -33.494
+    alpha_2 = 1.673
+    beta_2 = -19.982
+    alpha_3 = -0.03273
+    beta_3 = -0.006921
+    
+    #Section efficace totale
+    #N = 3.82 #gamma/annihilation p+/p-
+    E_loc = E
+    if E>E0:
+        return 0
+    else:
+        return (np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_1*np.exp(beta_1)+np.sign(E0-E_loc)*(np.abs(E0-E_loc))**alpha_2*np.exp(beta_2)+beta_3*np.exp(alpha_3*E_loc))
 
 if __name__ == '__main__':
     

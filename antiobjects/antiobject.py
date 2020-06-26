@@ -18,7 +18,7 @@ class Antiobject:
     
     sensitivity = Fermi_sensitivity('l0b30')
     bounds = sensitivity.bounds
-    E_span = np.linspace(bounds[0],925*u.MeV,10000)
+    E_span = np.linspace(bounds[0],1500*u.MeV,10000)
     F_span = pion_decay.spectrum(E_span)
     
     def __init__(self,**kwargs):
@@ -106,11 +106,12 @@ class Antiobject:
         plt.loglog(self.E_span,(self.sensitivity.flux(self.E_span)).to(u.erg*u.cm**(-2)*u.s**(-1)),color='black',linestyle=':',label='Fermi-LAT sensitivity \n 10 years point source')
         plt.xlabel(r'$E_\gamma$ [{}]'.format(self.E_span.unit.to_string('latex_inline')))
         plt.ylabel(r'$\nu F_\nu$ [{}]'.format(self.flux_on_earth.unit.to_string('latex_inline')))
-        plt.xlim(left=self.bounds[0]/u.MeV,right=937)
+        plt.xlim(left=self.bounds[0]/u.MeV,right=1200)
+        plt.ylim(10**(-14),10**(-10))
         plt.grid(True,which="both",ls="-")
         plt.legend()
         plt.title(r'Antistar spectrum $(10 M_\odot, 30 pc)$')
-    
+        
     
     def gen_cells(self):
         

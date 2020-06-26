@@ -28,5 +28,4 @@ antistar.plot_spectrum()
 #cluster.plot()
 #antiasteroid.plot()
 
-
 plt.savefig("astar.png", dpi=600,transparent=True)
