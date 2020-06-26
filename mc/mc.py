@@ -9,13 +9,13 @@ Created on Sun Jun 14 21:19:57 2020
 import numpy as np
 import dask.array as da
 import dask
-import matplotlib.pyplot as plt
 import warnings
 from tqdm import tqdm
 from scipy.stats import rv_continuous
 from astropy.io import fits
 from astropy.wcs import WCS
 from tools import imf,cimf
+from noisyopt import bisect,AveragedFunction
 
 with warnings.catch_warnings():
     
@@ -24,10 +24,9 @@ with warnings.catch_warnings():
     k_map = fits.getdata('K_map.fits')
     k_map[k_map<1e-10] = np.nan
     n_sources = 14
-    n_simulations = 1000
+    n_simulations = 100
     
 #%%
-
 
 class mass_gen(rv_continuous):
     "mass distribution"
@@ -66,14 +65,14 @@ def thrh_k(phi,tht):
         
 #%%
 @da.as_gufunc('()->()', output_dtypes=(float), vectorize=True)
-def simulate_starpop(s,fraction = 1.5e-4):
+def simulate_starpop(f):
 
     max_R = 500
     max_Z = 250
     
     n_stars = int(max_R**2*np.pi*max_Z*0.14)
     
-    is_astar = da.random.random(n_stars)<fraction
+    is_astar = da.random.random(n_stars)<f
     n_astars = is_astar.sum().compute()
     
     r = da.random.random(n_astars)*max_R
@@ -92,20 +91,11 @@ def simulate_starpop(s,fraction = 1.5e-4):
     
     return (k_cmp[~index]>k_ref[~index]).sum()
 
-lower = (simulate_starpop(da.zeros((n_simulations,))) < 14).sum()
-threshold = lower.compute()/n_simulations
+def oracle(f):
+    
+    lower = (simulate_starpop(da.ones((n_simulations,))*f) < n_sources).sum()
+    
+    return (lower.compute()/n_simulations)-0.95
 
-#%%
-# fig = plt.figure(figsize=(5,4))
-# axes_coords = [0, 0, 1, 1]
-# ax_image = fig.add_axes(axes_coords, label="ax image")
-# img = plt.imread('fermi_sky_map.png',format='float')
-# ax_image.imshow(img)
-# ax_image.axis('off')
-
-# ax_aitoff = fig.add_axes(axes_coords, projection='aitoff')
-# ax_aitoff.grid(True)
-# ax_aitoff.patch.set_alpha(0.)
-# ax_aitoff.set_xticklabels([])
-# ax_aitoff.set_yticklabels([])
-# ax_aitoff.scatter(phi,tht,color='white',marker='*',s=80)
+f = AveragedFunction(oracle)
+r = bisect(f,1e-6,1e-4)
