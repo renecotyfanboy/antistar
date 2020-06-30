@@ -8,7 +8,7 @@ Created on Sun Jun 14 21:19:57 2020
 
 import numpy as np
 import dask.array as da
-import dask
+from dask.distributed import Client,LocalCluster
 import warnings
 from tqdm import tqdm
 from scipy.stats import rv_continuous
@@ -16,15 +16,6 @@ from astropy.io import fits
 from astropy.wcs import WCS
 from tools import imf,cimf
 from noisyopt import bisect,AveragedFunction
-
-with warnings.catch_warnings():
-    
-    warnings.simplefilter("ignore")
-    wcs = WCS(header=fits.getheader('K_map.fits'),naxis=2)
-    k_map = fits.getdata('K_map.fits')
-    k_map[k_map<1e-10] = np.nan
-    n_sources = 14
-    n_simulations = 100
     
 #%%
 
@@ -40,9 +31,6 @@ class mass_gen(rv_continuous):
     def _cdf(self, x):
         return cimf(x)
     
-mass = mass_gen(a=0.01,b=150)
-m_sample = mass.rvs(size=10000)
-
 @da.as_gufunc('(),()->()', output_dtypes=(float), vectorize=True)
 def calc_k(m,rho):
     """
@@ -97,5 +85,25 @@ def oracle(f):
     
     return (lower.compute()/n_simulations)-0.95
 
-f = AveragedFunction(oracle)
-r = bisect(f,1e-6,1e-4)
+if __name__ == '__main__':
+    
+    with warnings.catch_warnings():
+    
+        warnings.simplefilter("ignore")
+        wcs = WCS(header=fits.getheader('K_map.fits'),naxis=2)
+        k_map = fits.getdata('K_map.fits')
+        k_map[k_map<1e-10] = np.nan
+        n_sources = 14
+        n_simulations = 1000
+
+    mass = mass_gen(a=0.01,b=150)
+    print('Sampling masses')
+    m_sample = mass.rvs(size=100000)
+    print('Done!')
+
+    cluster = LocalCluster()
+    client = Client(cluster)
+    print('Root-finding')
+    f = AveragedFunction(oracle)
+    r = bisect(f,1e-6,1e-4)
+    print(r)
