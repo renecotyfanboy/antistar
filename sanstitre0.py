@@ -14,7 +14,7 @@ import matplotlib.cm as cm
 
 k_map = fits.getdata('flux_MAMA.fits')
 k_map_old = fits.getdata('old_flux_MAMA.fits')
-k_map_old[k_map_old>1e-11] = np.nan
+k_map_old[k_map_old<1e-11] = np.nan
 WCS_in = WCS(header=fits.getheader('old_flux_MAMA.fits'),naxis=2)
 WCS_out = WCS(header=fits.getheader('flux_MAMA.fits'),naxis=2)
 k_map_old_reproject,_ = reproject_interp((k_map_old,WCS_in), WCS_out,shape_out= k_map.shape)
@@ -28,5 +28,5 @@ plt.imshow(ratio,
            origin='lower',
            cmap=cm.inferno)
 
-plt.colorbar(position='horizontal')
+plt.colorbar(orientation='horizontal')
 plt.savefig('ratio.png', dpi=600,transparent=True)
