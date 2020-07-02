@@ -70,7 +70,7 @@ def oracle(f):
 
 if __name__ == '__main__':
 
-    # client = Client()
+    client = Client(n_workers=42,threads_per_worker=1)
     
     with warnings.catch_warnings():
     
@@ -79,8 +79,8 @@ if __name__ == '__main__':
         k_map = fits.getdata('K_map.fits')
         k_map[k_map<1e-10] = np.nan
         n_sources = 14
-        n_simulations = 1000
+        n_simulations = 10
 
-    a,b,c = probabilistic_bisection(oracle,search_interval=(0,1))
+    a,b,c = probabilistic_bisection(oracle,search_interval=(1e-5,1e-1))
     np.save('interv.npy',a)
     np.save('res.npy',c[-1])
