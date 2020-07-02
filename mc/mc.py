@@ -10,6 +10,7 @@ import numpy as np
 import dask.array as da
 from dask.distributed import Client,LocalCluster
 import warnings
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.stats import rv_continuous
 from astropy.io import fits
@@ -86,7 +87,7 @@ def oracle(f):
     return (lower.compute()/n_simulations)-0.95
 
 if __name__ == '__main__':
-    
+
     with warnings.catch_warnings():
     
         warnings.simplefilter("ignore")
@@ -94,16 +95,21 @@ if __name__ == '__main__':
         k_map = fits.getdata('K_map.fits')
         k_map[k_map<1e-10] = np.nan
         n_sources = 14
-        n_simulations = 1000
+        n_simulations = 10000
 
     mass = mass_gen(a=0.01,b=150)
     print('Sampling masses')
     m_sample = mass.rvs(size=100000)
     print('Done!')
 
-    cluster = LocalCluster()
-    client = Client(cluster)
-    print('Root-finding')
-    f = AveragedFunction(oracle)
-    r = bisect(f,1e-6,1e-4)
-    print(r)
+    #client = Client()
+    # client = Client(cluster)
+    # print('Root-finding')
+    # f = AveragedFunction(oracle)
+    # r = bisect(f,1e-6,1e-4)
+    f = np.tile(np.geomspace(1e-6,1e-3,20),(n_simulations,1))
+    n_star = simulate_starpop(f)<14
+    ratio = da.sum(n_star,axis=0)/n_simulations
+    ratio = ratio.compute()
+
+    plt.plot(np.geomspace(1e-6,1e-3,20),ratio)

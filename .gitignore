@@ -6,3 +6,4 @@ gll_iem_v07.fits
 *.png
 /galaxia/
 /mc/data/
+/mc/bigsim.zarr
